@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: sanchpet-website
+  namespace: sanchpet-website
+spec:
+  interval: 1m
+  ref:
+    branch: master
+  url: https://github.com/sanchpet/sanch.pet
