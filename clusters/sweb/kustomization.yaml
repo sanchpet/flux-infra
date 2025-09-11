@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   ## Base bundle
   - ../../apps/bundles/sweb-flex
+  ## Customs
+  - cert-manager
