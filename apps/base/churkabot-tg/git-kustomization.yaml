@@ -1,0 +1,17 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: churkabot-tg
+  namespace: churkabot-tg
+spec:
+  interval: 5m
+  path: ./kustomize
+  prune: true
+  retryInterval: 2m0s
+  sourceRef:
+    kind: GitRepository
+    name: churkabot-tg
+  targetNamespace: churkabot-tg
+  timeout: 3m0s
+  wait: true
