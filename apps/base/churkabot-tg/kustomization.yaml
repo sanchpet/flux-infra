@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - git-repo.yaml
   - git-kustomization.yaml
-namespace: sanchpet-website
+namespace: churkabot-tg
