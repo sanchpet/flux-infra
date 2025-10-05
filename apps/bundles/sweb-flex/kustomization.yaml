@@ -6,6 +6,6 @@ resources:
   - ../../base/ingress-nginx
   - ../../base/sanch.pet
   - ../../base/churkabot-tg
-  - ../../base/victoria-metrics-k8s-stack
+#  - ../../base/victoria-metrics-k8s-stack
 patches:
   - path: sweb-flex.yaml
