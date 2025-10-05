@@ -5,3 +5,5 @@ resources:
   - ../../apps/bundles/sweb-flex
   ## Customs
   - cert-manager
+patches:
+  - path: cert-manager/helm-release.yaml
