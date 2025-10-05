@@ -1,0 +1,101 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-metrics-k8s-stack
+  namespace: monitoring
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: victoria-metrics-k8s-stack
+      sourceRef:
+        kind: HelmRepository
+        name: vm
+      interval: 12h
+  releaseName: victoria-metrics-k8s-stack
+  values:
+    victoria-metrics-operator:
+      image:
+        repository: "docker.io/victoriametrics/operator"
+      admissionWebhooks:
+        enabled: false
+    kube-state-metrics:
+      image:
+        registry: harbor.usa.proxy.sanch.pet/registry.k8s.io
+    vmsingle:
+      spec:
+        retentionPeriod: "7d"
+        storageDataPath: /victoria-metrics-data
+    vmagent:
+      spec:
+        externalLabels:
+          cluster: ${cluster_name}
+    vmalert:
+      spec:
+        extraArgs:
+          external.url: "https://grafana.${cluster_subdomain}"
+    grafana:
+      sidecar:
+        datasources:
+          searchNamespace: ALL
+        dashboards:
+          searchNamespace: ALL
+      grafana.ini:
+        server:
+          root_url: https://grafana.${cluster_subdomain}
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          cert-manager.io/cluster-issuer: "letsencrypt-nginx"
+          nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        hosts:
+          - grafana.${cluster_subdomain}
+        tls:
+        - hosts:
+          - grafana.${cluster_subdomain}
+          secretName: grafana-tls
+    alertmanager:
+      config:
+        global:
+          resolve_timeout: 5m
+        route:
+          group_by: ["alertgroup", "job"]
+          group_wait: 30s
+          group_interval: 6m
+          repeat_interval: 12h
+          receiver: "null"
+          routes:
+            - receiver: "null"
+              matchers:
+                - alertname = "Watchdog"
+            - receiver: "null"
+              matchers:
+                - alertname = "InfoInhibitor"
+        inhibit_rules:
+          - target_matchers:
+              - severity=~"warning|info"
+            source_matchers:
+              - severity=critical
+            equal:
+              - cluster
+              - namespace
+              - alertname
+          - target_matchers:
+              - severity=info
+            source_matchers:
+              - severity=warning
+            equal:
+              - cluster
+              - namespace
+              - alertname
+          - target_matchers:
+              - severity=info
+            source_matchers:
+              - alertname=InfoInhibitor
+            equal:
+              - cluster
+              - namespace
+        receivers:
+          - name: "null"
